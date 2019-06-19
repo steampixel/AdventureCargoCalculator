@@ -13,6 +13,7 @@
   "dependencies": {
     "@nuxtjs/bulma": "^1.2.1",
     "@nuxtjs/pwa": "^2.6.0",
+    "dotenv": "^8.0.0",
     "nuxt": "^2.0.0",
     "nuxt-matomo": "^1.2.2",
     "uuid": "^3.3.2",
