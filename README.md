@@ -1,6 +1,6 @@
-# WeightCalc
+# AdventureCargoCalculator
 
-> My sublime Nuxt.js project
+> Calculate the cargo weight for your next adventure trip
 
 ## Build Setup
 
