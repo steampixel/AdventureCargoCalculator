@@ -1,7 +1,7 @@
 <template>
   <div class="container has-padding-vertical-2">
 
-    <div class="card has-margin-bottom-2">
+    <div class="app-card has-margin-bottom-2">
       <h1 class="title">🚴 🚣 ⛺ Adventure Cargo Calculator</h1>
       <p>
         Hey! Use this App to calculate the cargo weight for your next adventure outdoor trip! Create and manage several lists with the names and weights of different items.
@@ -16,17 +16,19 @@
 
       <div v-for="(list, listIndex) in lists" :key="list.id" class="column is-half-tablet is-one-third-desktop">
 
-        <div :class="'card has-margin-bottom-2 '+(list.enabled ? '':'list-disabled')" :style="'background-color:'+list.color+'dd;'">
+        <div :class="'app-card has-margin-bottom-2 '+(list.enabled ? '':'list-disabled')" :style="'background-color:'+list.color+'dd;'">
 
           <div class="columns is-mobile">
-            <div class="column is-half">
+            <div class="column is-two-thirds">
               <Editable class="title" v-model="list.name" />
             </div>
             <div class="column has-text-right">
-              <input type="checkbox" v-model="list.enabled">
-              <input class="button" type="color" v-model="list.color">
-              <span class="button handle handle-list">☰</span>
-              <span class="button" @click="removeList(listIndex)">🗑</span>
+              <span class="color-btn-wrapper">
+                <div>🎨</div>
+                <input class="" type="color" v-model="list.color">
+              </span>
+              <span class="handle handle-list">☰</span>
+              <span class="" @click="removeList(listIndex)">🗑</span>
             </div>
           </div>
 
@@ -35,16 +37,16 @@
 
               <div v-for="(item, itemIndex) in list.items" :key="item.id">
                 <div :class="'columns is-mobile '+(item.enabled ? '':'item-disabled')">
-                  <div class="column is-one-third">
-                    <input type="checkbox" v-model="item.enabled">
-                    <span class="button handle handle-item">☰</span>
-                    <span class="button" @click="removeItem(listIndex, itemIndex)">🗑</span>
-                  </div>
-                  <div class="column is-one-third">
+                  <div class="column is-two-thirds">
+                    <span class="handle handle-item">☰</span>
+                    <span v-if="!clipboard" class="clipboard" @click="cut(listIndex, itemIndex)">✂</span>
+                    <span v-if="clipboard" class="clipboard" @click="paste(listIndex, itemIndex)">⎘</span>
                     <Editable class="item-name" v-model="item.name" />
+                    <span class="" @click="removeItem(listIndex, itemIndex)">🗑</span>
                   </div>
                   <div class="column has-text-right">
-                    <input type="number" class="form-control input-weight" v-model="item.weight" /> <strong>{{unit}}</strong>
+                    <input type="number" class="form-control input-weight" v-model="item.weight" />
+                    <input type="checkbox" v-model="item.enabled">
                   </div>
                 </div>
               </div>
@@ -57,7 +59,8 @@
               <button class="button button-primary" @click="addItem(listIndex)">Add item</button>
             </div>
             <div class="column is-half has-text-right">
-              Weight: <strong>{{calculateListWeight(listIndex)}} {{unit}}</strong>
+              Weight: {{calculateListWeight(listIndex)}}
+              <input type="checkbox" v-model="list.enabled">
             </div>
           </div>
 
@@ -66,7 +69,7 @@
 
       <div class="column is-half-tablet is-one-third-desktop">
 
-        <div class="card has-margin-bottom-2">
+        <div class="app-card has-margin-bottom-2">
 
           <button class="button button-primary" @click="addList()">Add new list</button>
 
@@ -76,10 +79,10 @@
 
     </draggable>
 
-    <div class="card has-margin-bottom-2">
+    <div class="app-card has-margin-bottom-2">
 
       <div class="has-margin-bottom-2">
-        Overall weight: <strong>{{calculateWeight()}} {{unit}}</strong>
+        Overall weight: {{calculateWeight()}}
       </div>
 
       <div class="has-margin-bottom-2">
@@ -118,7 +121,10 @@ export default {
   data: function() {
     return {
       unit: 'g',
-      lists: []
+      lists: [],
+      cutListIndex: 0,
+      cutItemIndex: 0,
+      clipboard: false
     }
   },
   mounted: function () {
@@ -240,6 +246,19 @@ export default {
     removeItem(listIndex, itemIndex){
       this.lists[listIndex].items.splice(itemIndex, 1)
     },
+    cut(listIndex, itemIndex) {
+      this.cutListIndex = listIndex
+      this.cutItemIndex = itemIndex
+      this.clipboard = true
+    },
+    paste(listIndex, itemIndex) {
+      var item = this.lists[this.cutListIndex].items[this.cutItemIndex]
+      this.lists[this.cutListIndex].items.splice(this.cutItemIndex, 1)// Cut from first list
+      this.lists[listIndex].items.splice(itemIndex, 0, item) // Paste to second list
+      this.cutListIndex = 0
+      this.cutItemIndex = 0
+      this.clipboard = false
+    },
     getRandomColor() {
       var letters = 'BCDEF'.split('');
       var color = '#';
@@ -303,14 +322,18 @@ export default {
 <style>
 
 body {
-  background-image: url(/backgrounds/shoes-1638873_1920.jpg);
   background-size: cover;
   background-repeat: no-repeat;
   background-position: center center;
   background-attachment:fixed;
 }
+@media(min-width:768px){
+  body {
+    background-image: url(/backgrounds/shoes-1638873_1920.jpg);
+  }
+}
 
-.card {
+.app-card {
   background-color:#ffffffdd;
   border-radius: 0px;
   padding:16px;
@@ -327,13 +350,28 @@ body {
 
 .handle {
   cursor: move;
+  display:none;
+}
+@media(min-width:1024px){
+  .handle {
+    display:inline-block;
+  }
+}
+
+.clipboard {
+
+}
+@media(min-width:1024px){
+  .clipboard {
+    display:none;
+  }
 }
 
 .input-weight {
   background-color:transparent;
   border:0;
   width:70px;
-  font-weight:bold;
+  /* font-weight:bold; */
   text-align:right;
 }
 
@@ -360,6 +398,24 @@ body {
 }
 
 .upload-btn-wrapper input[type=file] {
+  font-size: 100px;
+  position: absolute;
+  left: 0;
+  top: 0;
+  opacity: 0;
+  cursor:pointer;
+}
+
+/* color button */
+.color-btn-wrapper {
+  position: relative;
+  overflow: hidden;
+  display: inline-block;
+  cursor:pointer;
+  top: 4px;
+}
+
+.color-btn-wrapper input[type=color] {
   font-size: 100px;
   position: absolute;
   left: 0;
